@@ -1,18 +1,18 @@
-# MATISSE Tool: Akıllı Test Senaryosu ve Test Durumu Üretim Platformu
+# MATISSE Tool: Intelligent Test Scenario and Test Case Generation Platform
 
-MATISSE Tool, yazılım test süreçlerini optimize etmek ve kullanıcı dostu bir deneyim sunmak için tasarlanmış modern bir test otomasyon platformudur. Çeşitli dokümanlardan test senaryoları ve detaylı test durumları üretmek amacıyla güçlü teknolojilerle geliştirilmiştir.
+MATISSE Tool is a modern test automation platform designed to optimize software testing processes while offering a user-friendly experience. It has been developed with advanced technologies to generate test scenarios and detailed test cases from various documents.
 
-## Özellikler
+## Features
 
-- **Fonksiyonel ve Fonksiyonel Olmayan Testler:** Doküman içeriklerine göre uygun test kategorilerini belirler ve bağlamsal olarak doğru test senaryoları oluşturur.
-- **Test Durumu Üretimi:** Test senaryolarından spesifik ve detaylı test durumları türetir.
-- **Kullanıcı Dostu Arayüz:** Streamlit tabanlı arayüz ile kolay doküman yükleme, test kategorisi seçimi ve senaryo özelleştirme imkanı sağlar.
-- **LLM Entegrasyonu:** Llama, Mistral ve Codellama gibi modern büyük dil modelleri ile test senaryoları üretir.
-- **Esnek Veri Yönetimi:** MongoDB ile oturum yönetimi, kullanıcı girdileri ve test sonuçlarını saklar.
+- **Functional and Non-Functional Tests:** Identifies appropriate test categories based on document content and creates contextually accurate test scenarios.
+- **Test Case Generation:** Derives specific and detailed test cases from test scenarios.
+- **User-Friendly Interface:** Provides an intuitive Streamlit-based interface for easy document upload, test category selection, and scenario customization.
+- **LLM Integration:** Utilizes modern large language models such as Llama, Mistral, and Codellama to generate test scenarios.
+- **Flexible Data Management:** Manages session data, user inputs, and test results using MongoDB.
 
-## Kullanılan Teknolojiler
+## Technologies Used
 
-- **LLM (Large Language Model):** Doğal dil işleme teknolojileriyle bağlama uygun test senaryoları üretir.
-- **Ollama:** LLM modellerinin entegrasyonu ve çalıştırılmasını kolaylaştıran bir platform.
-- **Streamlit:** Kullanıcı arayüzü ve gerçek zamanlı işlem desteği sunar.
-- **MongoDB:** Esnek ve ölçeklenebilir veri yönetimi sağlar.
+- **LLM (Large Language Model):** Generates context-aware test scenarios using natural language processing technologies.
+- **Ollama:** A platform that simplifies the integration and execution of LLM models.
+- **Streamlit:** Offers a user interface and real-time processing support.
+- **MongoDB:** Provides flexible and scalable data management.
