@@ -34,19 +34,27 @@
 
 ```mermaid
 flowchart TB
-    A("Start") --> B["Load all test cases"]
-    B --> C["Unique List (unique_cases) = [] (empty)"]
-    C --> D["Start processing each test case"]
-    D --> E["Process test case <br/> is_duplicate = False"]
-    E --> F{"Is there a case<br/> already in Unique List?"}
-    F -- "Yes" --> G["Ask LLM: <br/> 'Are these two test cases the same?'"]
-    G --> H{"is_same = True?"}
-    H -- "Yes" --> I["Marked as same → is_duplicate = True<br/> Stop comparison"]
-    H -- "No" --> J["Continue comparing with <br/> another unique_case"]
-    I --> K
-    J --> F
-    F -- "No, none <br/> or all checked" --> K["If is_duplicate = False <br/> Add to Unique List"]
-    K --> L{"Are there more test cases?"}
-    L -- "Yes" --> D
-    L -- "No" --> M["Unique Test Case List is ready"]
-    M --> N("End")
+    A("Start") --> B["Upload JSON File"]
+    B --> C{"Is JSON File Valid?"}
+    C -- "No" --> D["Display Error/Warning<br/> Skip Invalid Test Cases"]
+    C -- "Yes" --> E["Load Valid Test Cases"]
+    E --> F["Initialize Unique List:<br/> unique_cases = []"]
+    F --> G["Begin Processing Each Test Case"]
+    G --> H["Set is_duplicate = False"]
+    H --> I{"Is there a case<br/> in Unique List?"}
+    I -- "Yes" --> J["Query LLM:<br/>'Are these test cases the same?'"]
+    J --> K{"LLM Response:<br/> is_same = true?"}
+    K -- "Yes" --> L["Mark as Duplicate<br/> Save in duplicates list"]
+    L --> M
+    K -- "No" --> N["Continue Comparing with<br/> Next Unique Case"]
+    N --> I
+    I -- "No, or All Checked" --> O{"is_duplicate = False?"}
+    O -- "True" --> P["Add to Unique List"]
+    O -- "False" --> Q
+    P --> Q["Move to Next Test Case"]
+    Q --> R{"Are There More Test Cases?"}
+    R -- "Yes" --> G
+    R -- "No" --> S["Unique Test Case List Ready"]
+    S --> T["Display Results:<br/> Unique List, Duplicates,<br/> and Logs"]
+    T --> U["Download Processed Results"]
+    U --> V("End")
