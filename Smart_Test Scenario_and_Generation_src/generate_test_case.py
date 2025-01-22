@@ -16,7 +16,7 @@ def generate_json_structure():
     JSON Output Structure:
 
     {
-        "TestScenarios": [
+        "TestCases": [
             {
                 "ScenarioID": "<Dynamic Scenario ID>",
                 "TestCaseID": "<Dynamic Test Case ID>",

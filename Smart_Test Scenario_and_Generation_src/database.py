@@ -127,3 +127,12 @@ def fetch_model_output_from_db(session_id):
         return document["model_output"]
     else:
         return None
+
+# Save the model output to the database using the session ID
+def save_test_cases_to_db(session_id, generated_test_cases, db):
+    collection = db["sessions"]
+    collection.update_one(
+        {"session_id": session_id},
+        {"$set": {"TestCases": generated_test_cases}},
+        upsert=True
+    )

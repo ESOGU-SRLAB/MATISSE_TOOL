@@ -97,11 +97,16 @@ def validate_json_structure(data):
 
 
 # Save the model output to the database using the session ID
+# If each session is running independently and one session is not switched to the next before it is completed, 
+# there is no risk of data being mixed up. Therefore, the existing save_model_output_to_db function will be sufficient.
 def save_model_output_to_db(session_id, model_output, db):
+    """
+    Saves the model output to the 'sessions' collection under the specified session ID.
+    """
     collection = db["sessions"]
     collection.update_one(
-        {"session_id": session_id},
-        {"$set": {"model_output": model_output}},
-        upsert=True
+        {"session_id": session_id},  # Match the document with the session_id
+        {"$set": {"model_output": model_output}},  # Update or insert 'model_output' at the root level
+        upsert=True  # Create the document if it doesn't exist
     )
-    logging.info("Model output saved to database.")
+

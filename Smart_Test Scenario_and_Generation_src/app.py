@@ -219,11 +219,31 @@ if selected_test_name:
     scenario_data = fetch_scenario_from_db(selected_test_name, session_id=session_id)
     # Check scenario data and other required fields to proceed
     if scenario_data and document_type != "--Please Select a Type--" and document_content and process_title:
+        # If the customised prompt status is True, show a warning message
+        if scenario_data.get("customised_prompt_status", False):
+            st.warning("A customised prompt has already been created for this scenario. If you wish to initiate a new testing process, please refresh the page to start a new session.")
+
+        # Save the selected category and test type to the database
+        sessions_collection = get_sessions_collection()
+        sessions_collection.update_one(
+            {"session_id": session_id}, # Find the session with the session_id
+            {
+                "$set": {
+                    "selected_category": selected_category,  # Save the selected category
+                    "selected_test_type": selected_test_name  # Save the selected test type
+                }
+            },
+            upsert=True  # If the session does not exist, create a new one
+        )
+        # Show a success message when the category and test type are saved
+        st.success("Category and test type saved successfully!")
+
+        # Display the initial prompt
         st.write("### Initial Prompt")
         
-        # Initial Prompt Text - Görüntülenebilir, ancak düzenlenemez
+        # Initial Prompt Text - Show the initial prompt text in an expander
         test_prompt = scenario_data.get("test_prompt", "No test prompt available.")
-        with st.expander("Initial Prompt Text", expanded=True):
+        with st.expander("Initial Prompt Text", expanded=False):
             st.write(test_prompt)
         
         if test_prompt != "No test prompt available.":
@@ -235,7 +255,7 @@ if selected_test_name:
                 customised_prompt = scenario_data.get("customised_prompt", "No customised prompt available.")
                 if customised_prompt != "No customised prompt available.":
 
-                    with st.expander("Customised Prompt Text", expanded=True):
+                    with st.expander("Customised Prompt Text", expanded=False):
                         editable_prompt = st.session_state.get("editable_prompt", False)
                         
                         if editable_prompt:
@@ -463,27 +483,56 @@ if selected_test_name:
                 with st.expander("Generated Prompt"):
                     st.text_area("Prompt", combined_prompt, height=200)
 
+        # # Run Model with Generated Prompt button
+        # if st.button("Run Model on Generated Prompt"):
+        #     # Check if combined_prompt is available in session_state
+        #     if "combined_prompt" in st.session_state:
+        #         combined_prompt = st.session_state["combined_prompt"]
+        #         # Take the model output
+        #         model_output = run_model_on_prompt(selected_llm_model, combined_prompt)
+                
+        #         # Check if the model output is available
+        #         if model_output:
+        #             # Show the model output
+        #             with st.expander("Model Output", expanded=False):
+        #                 st.write(model_output)
+        #             # Save the model output to the database
+        #             save_model_output_to_db(session_id, model_output, db)
+        #             # Show a success message when the model output is saved
+        #             st.success("Model run successfully and output saved to database!")
+        #         else:
+        #             st.error("Model output validation failed.")
+        #     else:
+        #         st.warning("Please generate a prompt before running the model.")
         # Run Model with Generated Prompt button
         if st.button("Run Model on Generated Prompt"):
-            # Check if combined_prompt is available in session_state
-            if "combined_prompt" in st.session_state:
-                combined_prompt = st.session_state["combined_prompt"]
-                # Take the model output
-                model_output = run_model_on_prompt(selected_llm_model, combined_prompt)
-                
-                # Check if the model output is available
-                if model_output:
-                    # Show the model output
-                    with st.expander("Model Output", expanded=True):
-                        st.write(model_output)
-                    # Save the model output to the database
-                    save_model_output_to_db(session_id, model_output, db)
-                    # Show a success message when the model output is saved
-                    st.success("Model run successfully and output saved to database!")
-                else:
-                    st.error("Model output validation failed.")
+            # Fetch the current session data
+            current_session = db["sessions"].find_one({"session_id": session_id})
+            
+            # Check if a TestScenario already exists in the session
+            if current_session and "model_output" in current_session and "TestScenarios" in current_session["model_output"]:
+                st.warning("A test scenario already exists in this session. Please proceed to create test cases.")
             else:
-                st.warning("Please generate a prompt before running the model.")
+                # Check if combined_prompt is available in session_state
+                if "combined_prompt" in st.session_state:
+                    combined_prompt = st.session_state["combined_prompt"]
+                    # Take the model output
+                    model_output = run_model_on_prompt(selected_llm_model, combined_prompt)
+                    
+                    # Check if the model output is available
+                    if model_output:
+                        # Show the model output
+                        with st.expander("Model Output", expanded=False):
+                            st.write(model_output)
+                        # Save the model output to the database
+                        save_model_output_to_db(session_id, {"TestScenarios": model_output["TestScenarios"]}, db)
+                        # Show a success message when the model output is saved
+                        st.success("Test scenario created successfully and saved to the database!")
+                    else:
+                        st.error("Model output validation failed.")
+                else:
+                    st.warning("Please generate a prompt before running the model.")
+
         
         # # We will upgrade this part in the next steps
         # # LLM Output Judge Elements
@@ -557,7 +606,7 @@ if selected_test_name:
         #                     st.success("Judge has been run and output saved to database.")
                             
         #                     # Display the judge output to the user
-        #                     with st.expander("Judge Output", expanded=True):
+        #                     with st.expander("Judge Output", expanded=False):
         #                         st.write(judge_output)
         #                 else:
         #                     st.error("Judge output validation failed.")
@@ -639,8 +688,8 @@ if selected_test_name:
         # Test Case Generation Model Selection
         test_case_generation_model = st.selectbox("Select an LLM model:", llm_models, key="test_case_generation_model")
         
-        # Create Test Scenarios Button
-        if st.button("Create Test Scenarios"):
+        # Create Test Case Button
+        if st.button("Create Test Case"):
             # Check if the model output is available in the database
             model_output = fetch_model_output_from_db(session_id)
             # Check if the model output is available
@@ -662,78 +711,136 @@ if selected_test_name:
                 # Call the generate_json_structure function to get the JSON structure for the test case
                 test_case_json_structure = generate_json_structure()
 
-                # Iterate over the test scenarios and generate test cases
-                for scenario in test_scenarios:
-                    # Merge all the details into a single string
-                    scenario_details = "\n".join(f"{key}: {value}" for key, value in scenario.items())
+            #     # Iterate over the test scenarios and generate test cases
+            #     for scenario in test_scenarios:
+            #         # Merge all the details into a single string
+            #         scenario_details = "\n".join(f"{key}: {value}" for key, value in scenario.items())
 
-                    # Combine the selected test case prompts
-                    combined_prompts = []
-                    # Iterate over the selected test cases and add the prompts to the list
-                    for test_case_type, is_selected in selected_test_cases.items():
-                        # Check if the test case type is selected
-                        if is_selected:
-                            # Get the specific prompt for the test case type
-                            specific_prompt = test_case_prompts.get(test_case_type, "")
-                            # Add the test case type and specific prompt to the combined prompts list
-                            combined_prompts.append(f"Test Case Type: {test_case_type}\n{specific_prompt}")
+            #         # Combine the selected test case prompts
+            #         combined_prompts = []
+            #         # Iterate over the selected test cases and add the prompts to the list
+            #         for test_case_type, is_selected in selected_test_cases.items():
+            #             # Check if the test case type is selected
+            #             if is_selected:
+            #                 # Get the specific prompt for the test case type
+            #                 specific_prompt = test_case_prompts.get(test_case_type, "")
+            #                 # Add the test case type and specific prompt to the combined prompts list
+            #                 combined_prompts.append(f"Test Case Type: {test_case_type}\n{specific_prompt}")
                     
-                    # Create a prompt for the scenario details
-                    scenario_details_text = f"Scenario Details:\n{scenario_details}"
+            #         # Create a prompt for the scenario details
+            #         scenario_details_text = f"Scenario Details:\n{scenario_details}"
 
-                    # For combined prompts, perform the merging process separately
-                    combined_prompts_text = "Combined Test Case Prompts:\n" + "\n\n".join(combined_prompts)
+            #         # For combined prompts, perform the merging process separately
+            #         combined_prompts_text = "Combined Test Case Prompts:\n" + "\n\n".join(combined_prompts)
 
-                    # Convert the JSON structure to a string
-                    test_case_structure_text = str(test_case_json_structure)
+            #         # Convert the JSON structure to a string
+            #         test_case_structure_text = str(test_case_json_structure)
 
-                    # Merge all the prompts and details into a single prompt
-                    combined_prompt = (
-                        f"{test_case_main_prompt}\n\n"
-                        f"{scenario_details_text}\n\n"
-                        f"{combined_prompts_text}\n\n"
-                        f"{test_case_structure_text}\n\n"
-                    )
+            #         # Merge all the prompts and details into a single prompt
+            #         combined_prompt = (
+            #             f"{test_case_main_prompt}\n\n"
+            #             f"{scenario_details_text}\n\n"
+            #             f"{combined_prompts_text}\n\n"
+            #             f"{test_case_structure_text}\n\n"
+            #         )
 
-                    # Try to generate a test case from the LLM and handle exceptions
-                    try:
-                        # Generate a test case from the combined prompt using the LLM model
-                        test_case_llm_output_json = generate_test_case(test_case_generation_model, combined_prompt, max_retries=3)
-                    except Exception as e:
-                        # Show an error message if an exception occurs during test case generation from LLM
-                        st.error(f"An error occurred while generating test case from LLM: {e}")
-                        # Set the test case LLM output to an error message
-                        test_case_llm_output_json = {"error": "Failed to generate test case"}
+            #         # Try to generate a test case from the LLM and handle exceptions
+            #         try:
+            #             # Generate a test case from the combined prompt using the LLM model
+            #             test_case_llm_output_json = generate_test_case(test_case_generation_model, combined_prompt, max_retries=3)
+            #         except Exception as e:
+            #             # Show an error message if an exception occurs during test case generation from LLM
+            #             st.error(f"An error occurred while generating test case from LLM: {e}")
+            #             # Set the test case LLM output to an error message
+            #             test_case_llm_output_json = {"error": "Failed to generate test case"}
 
-                    # Save the generated test case to the database
-                    test_case_data = {
-                        "scenario_id": scenario.get("ScenarioID", "Unknown"),
-                        "combined_prompt": combined_prompt,
-                        "test_case": test_case_llm_output_json
-                    }
-                    # Append the generated test case to the list
-                    generated_test_cases.append(test_case_data)
+            #         # Save the generated test case to the database
+            #         test_case_data = {
+            #             "scenario_id": scenario.get("ScenarioID", "Unknown"),
+            #             "combined_prompt": combined_prompt,
+            #             "test_case": test_case_llm_output_json
+            #         }
+            #         # Append the generated test case to the list
+            #         generated_test_cases.append(test_case_data)
 
-                    # Update the scenario in the database with the generated test case
-                    update_scenario_in_db(
-                        selected_test_name,
-                        test_case_data,
-                        session_id=session_id
-                    )
+            #         # Update the scenario in the database with the generated test case
+            #         update_scenario_in_db(
+            #             selected_test_name,
+            #             test_case_data,
+            #             session_id=session_id
+            #         )
 
-            # Show a success message if test cases are generated successfully
+            # # Show a success message if test cases are generated successfully
+            # if generated_test_cases:
+            #     st.success("Test cases created successfully and saved to the database!")
+            #     # Display the generated test cases in expanders
+            #     st.write("### Generated Test Cases")
+            #     # Iterate over the generated test cases and display them in expanders
+            #     for i, test_case in enumerate(generated_test_cases):
+            #         # Create an expander for each test case and display the test case inside it
+            #         with st.expander(f"Test Case {i + 1}: Scenario ID - {test_case['scenario_id']}", expanded=False):
+            #             st.json(test_case["test_case"])
+            # else:
+            #     # Show a warning message if no test cases are generated
+            #     st.warning("No test cases were generated. Please select at least one test case type.")
+            # Iterate over the test scenarios and generate test cases
+            for scenario in test_scenarios:
+                # Merge all the details into a single string
+                scenario_details = "\n".join(f"{key}: {value}" for key, value in scenario.items())
+
+                # Combine the selected test case prompts
+                combined_prompts = []
+                for test_case_type, is_selected in selected_test_cases.items():
+                    if is_selected:
+                        specific_prompt = test_case_prompts.get(test_case_type, "")
+                        combined_prompts.append(f"Test Case Type: {test_case_type}\n{specific_prompt}")
+
+                scenario_details_text = f"Scenario Details:\n{scenario_details}"
+                combined_prompts_text = "Combined Test Case Prompts:\n" + "\n\n".join(combined_prompts)
+                test_case_structure_text = str(test_case_json_structure)
+
+                # Merge all prompts into a single combined prompt
+                combined_prompt = (
+                    f"{test_case_main_prompt}\n\n"
+                    f"{scenario_details_text}\n\n"
+                    f"{combined_prompts_text}\n\n"
+                    f"{test_case_structure_text}\n\n"
+                )
+
+                try:
+                    test_case_llm_output_json = generate_test_case(test_case_generation_model, combined_prompt, max_retries=3)
+                except Exception as e:
+                    st.error(f"An error occurred while generating test case from LLM: {e}")
+                    test_case_llm_output_json = {"error": "Failed to generate test case"}
+
+                test_case_data = {
+                    "scenario_id": scenario.get("ScenarioID", "Unknown"),
+                    "combined_prompt": combined_prompt,
+                    "test_case": test_case_llm_output_json,
+                }
+
+                generated_test_cases.append(test_case_data)
+
+            # Save `TestScenarios` and `TestCases` in `model_output`
+            model_output_to_save = {
+                "TestScenarios": test_scenarios,  # Assuming `test_scenarios` contains original scenario details
+                "TestCases": generated_test_cases,  # Assuming `generated_test_cases` contains test case outputs
+            }
+
+            # Call the updated save function to save in the 'sessions' collection
+            save_model_output_to_db(session_id, model_output_to_save, db)
+
+            # Confirmation message
             if generated_test_cases:
                 st.success("Test cases created successfully and saved to the database!")
-                # Display the generated test cases in expanders
                 st.write("### Generated Test Cases")
-                # Iterate over the generated test cases and display them in expanders
                 for i, test_case in enumerate(generated_test_cases):
-                    # Create an expander for each test case and display the test case inside it
                     with st.expander(f"Test Case {i + 1}: Scenario ID - {test_case['scenario_id']}", expanded=False):
                         st.json(test_case["test_case"])
             else:
-                # Show a warning message if no test cases are generated
                 st.warning("No test cases were generated. Please select at least one test case type.")
+
+
 
     else:
         # Show a warning message if the required fields are not provided
