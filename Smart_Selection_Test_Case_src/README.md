@@ -34,30 +34,28 @@
 
 ```mermaid
 flowchart TB
-    A("Start") --> B["Upload JSON File"]
-    B --> C{"Is JSON File Valid?"}
-    C -- "No" --> D["Display Error/Warning<br/> Skip Invalid Test Cases"]
-    C -- "Yes" --> E["Load Valid Test Cases"]
-    E --> F["Initialize Unique List:<br/> unique_cases = []"]
-    F --> G["Begin Processing Each Test Case"]
-    G --> H["Set is_duplicate = False"]
-    H --> I{"Is there a case<br/> in Unique List?"}
-    I -- "Yes" --> J["Query LLM:<br/>'Are these test cases the same?'"]
-    J --> K{"LLM Response:<br/> is_same = true?"}
-    K -- "Yes" --> L["Mark as Duplicate<br/> Save in duplicates list"]
-    L --> M
-    K -- "No" --> N["Continue Comparing with<br/> Next Unique Case"]
-    N --> I
-    I -- "No, or All Checked" --> O{"is_duplicate = False?"}
-    O -- "True" --> P["Add to Unique List"]
-    O -- "False" --> Q
-    P --> Q["Move to Next Test Case"]
-    Q --> R{"Are There More Test Cases?"}
-    R -- "Yes" --> G
-    R -- "No" --> S["Unique Test Case List Ready"]
-    S --> T["Display Results:<br/> Unique List, Duplicates,<br/> and Logs"]
-    T --> U["Download Processed Results"]
-    U --> V("End")
+    A("Start") --> B["Fetch Valid Combinations from MongoDB"]
+    B --> C{"Are Combinations Available?"}
+    C -- "No" --> D["Display 'No Valid Combinations Found'"]
+    C -- "Yes" --> E["Select Combination:<br/> Process Title - Test Type - Category"]
+    E --> F{"Details Available for Combination?"}
+    F -- "No" --> G["Display 'No Details Found'"]
+    F -- "Yes" --> H["Fetch Test Cases for Selected Combination"]
+    H --> I{"Are Test Cases Available?"}
+    I -- "No" --> J["Display 'No Test Cases Found'"]
+    I -- "Yes" --> K["Display Test Cases with Select Options"]
+    K --> L["Select/Deselect All Test Cases Option"]
+    L --> M["Display Selected Test Cases"]
+    M --> N{"Run Smart Selection?"}
+    N -- "No" --> O["Wait for User Action"]
+    N -- "Yes" --> P["Validate and Convert Selected Test Cases to Objects"]
+    P --> Q{"Are Valid Test Cases Available?"}
+    Q -- "No" --> R["Display 'No Valid Test Cases'"]
+    Q -- "Yes" --> S["Process Smart Selection Using LLM"]
+    S --> T["Log Results:<br/> Unique Cases, Similar Cases, and Comparison Logs"]
+    T --> U["Display Results:<br/> Unique Cases, Similar Cases, Logs"]
+    U --> V["Provide Download Options for Results"]
+    V --> W("End")
 ```
 
 # Installation Guide
