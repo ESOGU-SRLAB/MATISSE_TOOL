@@ -1,0 +1,5 @@
+streamlit
+pydantic
+pymongo
+ollama
+streamlit-mermaid
