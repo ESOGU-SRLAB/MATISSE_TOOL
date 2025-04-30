@@ -38,6 +38,16 @@ Use the following command to install all the necessary Python libraries listed i
 ```bash
 pip install -r requirements.txt
 ```
+### Key Libraries Installed
+
+- **Streamlit**: A framework for building interactive web applications in Python.
+- **Pydantic**: A library for data validation and parsing using Python type annotations.
+- **Llama Index**: Provides integrations for managing and querying large language models.
+- **Requests**: Enables making HTTP requests to interact with APIs.
+- **JSON**: Used for handling JSON data processing.
+- **UUID**: Generates universally unique identifiers.
+- **Datetime**: Handles timestamping for logs and operations.
+  
 ## Step 4: Run the Application
 
 Once everything is set up, you can run the application using the following command:
@@ -66,13 +76,3 @@ You're now ready to use the Smart Test Generation Tool!
 - **Ollama:** A platform that simplifies the integration and execution of LLM models.
 - **Streamlit:** Offers a user interface and real-time processing support.
 - **MongoDB:** Provides flexible and scalable data management.
-
-### Key Libraries Installed
-
-- **Streamlit**: A framework for building interactive web applications in Python.
-- **Pydantic**: A library for data validation and parsing using Python type annotations.
-- **Llama Index**: Provides integrations for managing and querying large language models.
-- **Requests**: Enables making HTTP requests to interact with APIs.
-- **JSON**: Used for handling JSON data processing.
-- **UUID**: Generates universally unique identifiers.
-- **Datetime**: Handles timestamping for logs and operations.
