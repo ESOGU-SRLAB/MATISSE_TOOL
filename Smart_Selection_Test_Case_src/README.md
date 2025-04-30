@@ -1,3 +1,68 @@
+# MATISSE Tool: Intelligent Test Scenario & Test Case Generation and Smart Selection Platform!
+
+MATISSE Tool is a modern test automation platform designed to optimize software testing processes while offering a user-friendly experience. It has been developed with advanced technologies to select test cases from generated test scenarios.
+
+# Installation Guide
+
+This document provides detailed instructions on how to install and set up the Smart Selection Tool.
+
+## Step 1: Clone the Repository
+
+First, clone the repository to your local machine:
+
+```bash
+git clone <repository_url>
+cd <repository_name>
+```
+
+## Step 2: Set Up a Virtual Environment (Optional but Recommended)
+
+Create and activate a virtual environment to isolate the dependencies:
+
+For Windows:
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+For macOS/Linux:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+## Step 3: Install Dependencies
+
+Use the following command to install all the necessary Python libraries listed in the `requirements.txt` file:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Key Libraries Installed
+
+- **Streamlit**: A framework for building interactive web applications in Python.
+- **Pydantic**: A library for data validation and parsing using Python type annotations.
+- **Llama Index**: Provides integrations for managing and querying large language models.
+- **Requests**: Enables making HTTP requests to interact with APIs.
+- **JSON**: Used for handling JSON data processing.
+- **UUID**: Generates universally unique identifiers.
+- **Datetime**: Handles timestamping for logs and operations.
+
+## Step 4: Run the Application
+
+Once everything is set up, you can run the application using the following command:
+
+```bash
+streamlit smart_selection.py
+```
+
+This will launch the Smart Selection Tool in your default web browser.
+
+---
+
+You're now ready to use the Smart Selection Tool!
+
 ## How It Works?
 
 1. **Initially**, we have a pile of test cases (with information like titles, descriptions, etc.).
@@ -57,73 +122,3 @@ flowchart TB
     U --> V["Provide Download Options for Results"]
     V --> W("End")
 ```
-
-# Installation Guide
-
-This document provides detailed instructions on how to install and set up the necessary dependencies for the Smart Test Case Selector project.
-
-## Step 1: Clone the Repository
-
-First, clone the repository to your local machine:
-
-```bash
-git clone <repository_url>
-cd <repository_name>
-```
-
-## Step 2: Set Up a Virtual Environment (Optional but Recommended)
-
-Create and activate a virtual environment to isolate the dependencies:
-
-For Windows:
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-
-For macOS/Linux:
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-## Step 3: Install Dependencies
-
-Use the following command to install all the necessary Python libraries listed in the `requirements.txt` file:
-
-```bash
-pip install -r requirements.txt
-```
-
-### Key Libraries Installed
-
-- **Streamlit**: A framework for creating interactive web applications in Python.
-- **Pydantic**: A data validation and settings management library using Python type annotations.
-- **UUID**: A standard library for generating universally unique identifiers.
-- **Ollama**: A library to interact with large language models for intelligent comparisons.
-- **Typing Extensions**: Provides advanced type hints for better code compatibility.
-- **Datetime**: A standard library for managing timestamps and date-based operations.
-
-## Step 4: Verify Installation
-
-Ensure all dependencies are correctly installed:
-
-```bash
-pip list
-```
-
-Look for the libraries listed above. If any issues arise, try reinstalling specific libraries using `pip install <library_name>`.
-
-## Step 5: Run the Application
-
-Once everything is set up, you can run the application:
-
-```bash
-streamlit run your_script.py
-```
-
-This will launch the application in your default web browser.
-
----
-
-You're now ready to use the Smart Test Case Selector!
